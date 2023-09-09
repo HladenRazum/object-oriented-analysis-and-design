@@ -16,18 +16,19 @@ const GuitarTypes = {
 };
 
 class GuitarSpec {
-   constructor({ model, type, wood }) {
+   constructor({ model, type, wood, numStrings }) {
       this.model = model;
       this.type = type;
       this.wood = wood;
+      this.numStrings = numStrings;
    }
 }
 
 class Guitar {
    #specification;
 
-   constructor({ model, type, wood, serialNumber, price }) {
-      this.#specification = new GuitarSpec({ model, type, wood });
+   constructor({ model, type, wood, numStrings, serialNumber, price }) {
+      this.#specification = new GuitarSpec({ model, type, wood, numStrings });
       this.serialNumber = serialNumber;
       this.price = price;
    }
@@ -58,14 +59,15 @@ class Inventory {
       return this.#items;
    }
 
-   search({ type, model, wood }) {
+   search({ type, model, wood, numStrings }) {
       const results = [];
       this.#items.forEach((guitar) => {
          const guitarSpec = guitar.getSpec();
          if (
             guitarSpec.type === type ||
             guitarSpec.model === model ||
-            guitarSpec.wood == wood
+            guitarSpec.wood == wood ||
+            guitarSpec.numStrings === numStrings
          ) {
             results.push(guitar);
          }
@@ -91,6 +93,7 @@ const g1 = new Guitar({
    type: GuitarTypes.ELECTRIC,
    wood: WoodTypes.MAHAGONY,
    price: 1310.5,
+   numStrings: 10,
 });
 const g2 = new Guitar({
    serialNumber: "1234",
@@ -98,6 +101,7 @@ const g2 = new Guitar({
    type: GuitarTypes.ACOUSTIC,
    wood: WoodTypes.MAPLE,
    price: 840.0,
+   numStrings: 12,
 });
 const g3 = new Guitar({
    serialNumber: "12346",
@@ -105,6 +109,7 @@ const g3 = new Guitar({
    type: GuitarTypes.ACOUSTIC,
    wood: WoodTypes.WALNUT,
    price: 120.0,
+   numStrings: 8,
 });
 
 const g4 = new Guitar({
@@ -113,6 +118,7 @@ const g4 = new Guitar({
    type: GuitarTypes.ACOUSTIC,
    wood: WoodTypes.WALNUT,
    price: 475.8,
+   numStrings: 8,
 });
 
 inventory.add(g1);
@@ -122,7 +128,10 @@ inventory.add(g4);
 
 const result = inventory.search({
    wood: WoodTypes.WALNUT,
+   numStrings: 12,
 });
+
+console.log(result);
 
 // UI
 const populateUI = () => {
@@ -130,6 +139,7 @@ const populateUI = () => {
 
    form.addEventListener("submit", (e) => {
       e.preventDefault();
+
       const formData = new FormData(form);
       const guitarObj = Object.fromEntries(formData);
 
@@ -140,6 +150,7 @@ const populateUI = () => {
          wood: guitarObj["wood-type"],
          price: parseInt(guitarObj["price"], 10),
          serialNumber: guitarObj["serial-number"],
+         numStrings: parseInt(guitarObj["num-strings"], 10),
       });
 
       // Add the guitar to inventory
@@ -223,6 +234,7 @@ const populateUI = () => {
    }
 
    woodRow.append(woodLabel, woodSelect);
+
    // Price field
    const priceRow = document.createElement("div");
    const priceLabel = document.createElement("label");
@@ -236,19 +248,36 @@ const populateUI = () => {
    priceInput.setAttribute("min", 0);
    priceInput.setAttribute("value", 500);
    priceInput.setAttribute("placeholder", "$");
+   priceInput.setAttribute("required", true);
    priceRow.append(priceLabel, priceInput);
+   // Number of strings field
+   const numStringsRow = document.createElement("div");
+   const numStringsLabel = document.createElement("label");
+   const numStringsInput = document.createElement("input");
+
+   numStringsInput.setAttribute("name", "num-strings");
+   numStringsInput.setAttribute("id", "num-strings");
+   numStringsInput.setAttribute("type", "number");
+   numStringsInput.setAttribute("min", "4");
+   numStringsInput.setAttribute("max", "20");
+   numStringsInput.setAttribute("value", "10");
+   numStringsInput.setAttribute("required", true);
+   numStringsLabel.setAttribute("for", "num-strings");
+   numStringsLabel.textContent = "Number of strings";
+   numStringsRow.append(numStringsLabel, numStringsInput);
 
    // Submit button
-   const submitButtn = document.createElement("button");
-   submitButtn.textContent = "Add Guitar";
-   submitButtn.setAttribute("type", "submit");
+   const submitButton = document.createElement("button");
+   submitButton.textContent = "Add Guitar";
+   submitButton.setAttribute("type", "submit");
 
    form.appendChild(serialNumberRow);
    form.appendChild(typeRow);
    form.appendChild(modelRow);
    form.appendChild(woodRow);
    form.appendChild(priceRow);
-   form.appendChild(submitButtn);
+   form.appendChild(numStringsRow);
+   form.appendChild(submitButton);
 
    form.querySelectorAll("div").forEach((div) => div.classList.add("form-row"));
 };
