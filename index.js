@@ -16,23 +16,16 @@ const GuitarTypes = {
 };
 
 class Guitar {
-   #serialNumber;
-
-   constructor({ model, type, wood }) {
-      if (this.constructor.counter) {
-         this.constructor.counter++;
-      } else {
-         this.constructor.counter = 1;
-      }
-
+   constructor({ model, type, wood, serialNumber, price }) {
+      this.serialNumber = serialNumber;
       this.model = model;
       this.type = type;
       this.wood = wood;
-      this.#serialNumber = `serial-${this.constructor.counter}`;
+      this.price = price;
    }
 
    getSerialNumber() {
-      return this.#serialNumber;
+      return this.serialNumber;
    }
 }
 
@@ -67,30 +60,46 @@ class Inventory {
 
       return results;
    }
+
+   checkIfSerialExists(serial) {
+      const result = this.#items.filter(
+         (item) => item.getSerialNumber().toLowerCase() === serial.toLowerCase()
+      );
+
+      return result.length > 0;
+   }
 }
 
 const inventory = new Inventory();
 
 const g1 = new Guitar({
+   serialNumber: "123",
    model: GuitarModels.FENDER,
    type: GuitarTypes.ELECTRIC,
    wood: WoodTypes.MAHAGONY,
+   price: 1310.5,
 });
 const g2 = new Guitar({
+   serialNumber: "1234",
    model: GuitarModels.TAYLOR,
    type: GuitarTypes.ACOUSTIC,
    wood: WoodTypes.MAPLE,
+   price: 840.0,
 });
 const g3 = new Guitar({
+   serialNumber: "12346",
    model: GuitarModels.GIBSON,
    type: GuitarTypes.ACOUSTIC,
    wood: WoodTypes.WALNUT,
+   price: 120.0,
 });
 
 const g4 = new Guitar({
+   serialNumber: "122346",
    model: GuitarModels.TAYLOR,
    type: GuitarTypes.ACOUSTIC,
    wood: WoodTypes.WALNUT,
+   price: 475.8,
 });
 
 inventory.add(g1);
@@ -101,8 +110,6 @@ inventory.add(g4);
 const results = inventory.search({
    wood: WoodTypes.WALNUT,
 });
-
-console.log(results);
 
 // UI
 const populateUI = () => {
@@ -118,6 +125,8 @@ const populateUI = () => {
          model: guitarObj["guitar-model"],
          type: guitarObj["guitar-type"],
          wood: guitarObj["wood-type"],
+         price: parseInt(guitarObj["price"], 10).toFixed(2),
+         serialNumber: guitarObj["serial-number"],
       });
 
       // Add the guitar to inventory
@@ -125,8 +134,24 @@ const populateUI = () => {
       form.reset();
    });
 
+   // Guitart SerialNumber textfield
+   const serialNumberRow = document.createElement("div");
+   const serialNumberLabel = document.createElement("label");
+   const serialNumberInput = document.createElement("input");
+
+   serialNumberInput.setAttribute("type", "text");
+   serialNumberInput.setAttribute("id", "serial-number");
+   serialNumberInput.setAttribute("name", "serial-number");
+   serialNumberLabel.setAttribute("for", "serial-number");
+   serialNumberLabel.textContent = "Serial number";
+   serialNumberInput.setAttribute("placeholder", "Serial number");
+   serialNumberInput.setAttribute("autocomplete", "off");
+   serialNumberInput.setAttribute("required", true);
+
+   serialNumberRow.append(serialNumberLabel, serialNumberInput);
+
    // Guitar Types Select
-   const row1 = document.createElement("div");
+   const typeRow = document.createElement("div");
    const guitarTypeLabel = document.createElement("label");
    const guitarTypeSelect = document.createElement("select");
 
@@ -144,13 +169,12 @@ const populateUI = () => {
       guitarTypeSelect.add(option);
    }
 
-   row1.append(guitarTypeLabel, guitarTypeSelect);
+   typeRow.append(guitarTypeLabel, guitarTypeSelect);
 
    // Guitar Model Select
-   const row2 = document.createElement("div");
+   const modelRow = document.createElement("div");
    const guitarModelLabel = document.createElement("label");
    const guitarModelSelect = document.createElement("select");
-
    guitarModelSelect.setAttribute("id", "guitar-model");
    guitarModelSelect.setAttribute("name", "guitar-model");
    guitarModelLabel.setAttribute("for", "guitar-model");
@@ -165,15 +189,15 @@ const populateUI = () => {
       guitarModelSelect.add(option);
    }
 
-   row2.append(guitarModelLabel, guitarModelSelect);
+   modelRow.append(guitarModelLabel, guitarModelSelect);
    // Guitar Wood Select
-   const row3 = document.createElement("div");
+   const woodRow = document.createElement("div");
    const woodLabel = document.createElement("label");
    const woodSelect = document.createElement("select");
 
    woodSelect.setAttribute("id", "wood-type");
    woodSelect.setAttribute("name", "wood-type");
-   woodLabel.setAttribute("for", "wood-model");
+   woodLabel.setAttribute("for", "wood-type");
    woodLabel.textContent = "Wood type";
 
    const woodTypes = Object.values(WoodTypes);
@@ -185,15 +209,32 @@ const populateUI = () => {
       woodSelect.add(option);
    }
 
-   row3.append(woodLabel, woodSelect);
+   woodRow.append(woodLabel, woodSelect);
+   // Price field
+   const priceRow = document.createElement("div");
+   const priceLabel = document.createElement("label");
+   const priceInput = document.createElement("input");
+
+   priceLabel.setAttribute("for", "price");
+   priceLabel.textContent = "Price";
+   priceInput.setAttribute("id", "price");
+   priceInput.setAttribute("name", "price");
+   priceInput.setAttribute("type", "number");
+   priceInput.setAttribute("min", 0);
+   priceInput.setAttribute("value", 500);
+   priceInput.setAttribute("placeholder", "$");
+   priceRow.append(priceLabel, priceInput);
+
    // Submit button
    const submitButtn = document.createElement("button");
    submitButtn.textContent = "Add Guitar";
    submitButtn.setAttribute("type", "submit");
 
-   form.appendChild(row1);
-   form.appendChild(row2);
-   form.appendChild(row3);
+   form.appendChild(serialNumberRow);
+   form.appendChild(typeRow);
+   form.appendChild(modelRow);
+   form.appendChild(woodRow);
+   form.appendChild(priceRow);
    form.appendChild(submitButtn);
 
    form.querySelectorAll("div").forEach((div) => div.classList.add("form-row"));
