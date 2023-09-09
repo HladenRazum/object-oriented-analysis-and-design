@@ -22,6 +22,15 @@ class GuitarSpec {
       this.wood = wood;
       this.numStrings = numStrings;
    }
+
+   checkIfMatchesAnyProperty({ model, type, wood, numStrings }) {
+      return (
+         this.type === type ||
+         this.model === model ||
+         this.wood == wood ||
+         this.numStrings === numStrings
+      );
+   }
 }
 
 class Guitar {
@@ -59,16 +68,11 @@ class Inventory {
       return this.#items;
    }
 
-   search({ type, model, wood, numStrings }) {
+   search(clientPreferences) {
       const results = [];
       this.#items.forEach((guitar) => {
          const guitarSpec = guitar.getSpec();
-         if (
-            guitarSpec.type === type ||
-            guitarSpec.model === model ||
-            guitarSpec.wood == wood ||
-            guitarSpec.numStrings === numStrings
-         ) {
+         if (guitarSpec.checkIfMatchesAnyProperty(clientPreferences)) {
             results.push(guitar);
          }
       });
@@ -127,8 +131,8 @@ inventory.add(g3);
 inventory.add(g4);
 
 const result = inventory.search({
-   wood: WoodTypes.WALNUT,
-   numStrings: 12,
+   type: GuitarTypes.ELECTRIC,
+   model: GuitarModels.TAYLOR,
 });
 
 console.log(result);
