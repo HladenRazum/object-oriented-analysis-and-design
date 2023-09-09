@@ -18,10 +18,17 @@ const GuitarTypes = {
 class Guitar {
    #serialNumber;
 
-   constructor(model, type) {
+   constructor({ model, type, wood }) {
+      if (this.constructor.counter) {
+         this.constructor.counter++;
+      } else {
+         this.constructor.counter = 1;
+      }
+
       this.model = model;
       this.type = type;
-      this.#serialNumber = "serial number here...";
+      this.wood = wood;
+      this.#serialNumber = `serial-${this.constructor.counter}`;
    }
 
    getSerialNumber() {
@@ -36,13 +43,63 @@ class Inventory {
       this.#items.push(guitar);
    }
 
+   remove(guitar) {
+      this.#items = this.#items.filter(
+         (g) => g.getSerialNumber() !== guitar.getSerialNumber()
+      );
+   }
+
    getAll() {
       return this.#items;
    }
+
+   search({ type, model, wood }) {
+      const results = [];
+      this.#items.forEach((guitar) => {
+         if (
+            guitar.type === type ||
+            guitar.model === model ||
+            guitar.wood == wood
+         ) {
+            results.push(guitar);
+         }
+      });
+
+      return results;
+   }
 }
 
-const g1 = new Guitar(GuitarModels.FENDER, GuitarTypes.ELECTRIC);
-const g2 = new Guitar(GuitarModels.TAYLOR, GuitarTypes.ACOUSTIC);
+const inventory = new Inventory();
 
-console.log(g1);
-console.log(g2);
+const g1 = new Guitar({
+   model: GuitarModels.FENDER,
+   type: GuitarTypes.ELECTRIC,
+   wood: WoodTypes.MAHAGONY,
+});
+const g2 = new Guitar({
+   model: GuitarModels.TAYLOR,
+   type: GuitarTypes.ACOUSTIC,
+   wood: WoodTypes.MAPLE,
+});
+const g3 = new Guitar({
+   model: GuitarModels.GIBSON,
+   type: GuitarTypes.ACOUSTIC,
+   wood: WoodTypes.WALNUT,
+});
+
+const g4 = new Guitar({
+   model: GuitarModels.TAYLOR,
+   type: GuitarTypes.ACOUSTIC,
+   wood: WoodTypes.WALNUT,
+});
+
+inventory.add(g1);
+inventory.add(g2);
+inventory.add(g3);
+inventory.add(g4);
+
+const results = inventory.search({
+   type: GuitarTypes.ELECTRIC,
+   model: GuitarModels.TAYLOR,
+   wood: WoodTypes.WALNUT,
+});
