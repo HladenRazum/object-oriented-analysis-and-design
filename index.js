@@ -15,13 +15,25 @@ const GuitarTypes = {
    ELECTRIC: "electric",
 };
 
-class Guitar {
-   constructor({ model, type, wood, serialNumber, price }) {
-      this.serialNumber = serialNumber;
+class GuitarSpec {
+   constructor({ model, type, wood }) {
       this.model = model;
       this.type = type;
       this.wood = wood;
+   }
+}
+
+class Guitar {
+   #specification;
+
+   constructor({ model, type, wood, serialNumber, price }) {
+      this.#specification = new GuitarSpec({ model, type, wood });
+      this.serialNumber = serialNumber;
       this.price = price;
+   }
+
+   getSpec() {
+      return this.#specification;
    }
 
    getSerialNumber() {
@@ -49,10 +61,11 @@ class Inventory {
    search({ type, model, wood }) {
       const results = [];
       this.#items.forEach((guitar) => {
+         const guitarSpec = guitar.getSpec();
          if (
-            guitar.type === type ||
-            guitar.model === model ||
-            guitar.wood == wood
+            guitarSpec.type === type ||
+            guitarSpec.model === model ||
+            guitarSpec.wood == wood
          ) {
             results.push(guitar);
          }
@@ -107,7 +120,7 @@ inventory.add(g2);
 inventory.add(g3);
 inventory.add(g4);
 
-const results = inventory.search({
+const result = inventory.search({
    wood: WoodTypes.WALNUT,
 });
 
@@ -125,7 +138,7 @@ const populateUI = () => {
          model: guitarObj["guitar-model"],
          type: guitarObj["guitar-type"],
          wood: guitarObj["wood-type"],
-         price: parseInt(guitarObj["price"], 10).toFixed(2),
+         price: parseInt(guitarObj["price"], 10),
          serialNumber: guitarObj["serial-number"],
       });
 
