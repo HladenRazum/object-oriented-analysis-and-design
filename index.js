@@ -99,7 +99,104 @@ inventory.add(g3);
 inventory.add(g4);
 
 const results = inventory.search({
-   type: GuitarTypes.ELECTRIC,
-   model: GuitarModels.TAYLOR,
    wood: WoodTypes.WALNUT,
 });
+
+console.log(results);
+
+// UI
+const populateUI = () => {
+   const form = document.getElementById("add-guitar-form");
+
+   form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const guitarObj = Object.fromEntries(formData);
+
+      // Add a new Guitar
+      const g = new Guitar({
+         model: guitarObj["guitar-model"],
+         type: guitarObj["guitar-type"],
+         wood: guitarObj["wood-type"],
+      });
+
+      // Add the guitar to inventory
+      inventory.add(g);
+      form.reset();
+   });
+
+   // Guitar Types Select
+   const row1 = document.createElement("div");
+   const guitarTypeLabel = document.createElement("label");
+   const guitarTypeSelect = document.createElement("select");
+
+   guitarTypeSelect.setAttribute("id", "guitar-type");
+   guitarTypeSelect.setAttribute("name", "guitar-type");
+   guitarTypeLabel.setAttribute("for", "guitar-type");
+   guitarTypeLabel.textContent = "Guitar type";
+
+   const guitarTypes = Object.values(GuitarTypes);
+   for (const guitarType of guitarTypes) {
+      const option = document.createElement("option");
+      option.setAttribute("id", guitarType);
+      option.setAttribute("value", guitarType);
+      option.text = guitarType;
+      guitarTypeSelect.add(option);
+   }
+
+   row1.append(guitarTypeLabel, guitarTypeSelect);
+
+   // Guitar Model Select
+   const row2 = document.createElement("div");
+   const guitarModelLabel = document.createElement("label");
+   const guitarModelSelect = document.createElement("select");
+
+   guitarModelSelect.setAttribute("id", "guitar-model");
+   guitarModelSelect.setAttribute("name", "guitar-model");
+   guitarModelLabel.setAttribute("for", "guitar-model");
+   guitarModelLabel.textContent = "Model";
+
+   const guitarModels = Object.values(GuitarModels);
+   for (const guitarModel of guitarModels) {
+      const option = document.createElement("option");
+      option.setAttribute("id", guitarModel);
+      option.setAttribute("value", guitarModel);
+      option.text = guitarModel;
+      guitarModelSelect.add(option);
+   }
+
+   row2.append(guitarModelLabel, guitarModelSelect);
+   // Guitar Wood Select
+   const row3 = document.createElement("div");
+   const woodLabel = document.createElement("label");
+   const woodSelect = document.createElement("select");
+
+   woodSelect.setAttribute("id", "wood-type");
+   woodSelect.setAttribute("name", "wood-type");
+   woodLabel.setAttribute("for", "wood-model");
+   woodLabel.textContent = "Wood type";
+
+   const woodTypes = Object.values(WoodTypes);
+   for (const woodType of woodTypes) {
+      const option = document.createElement("option");
+      option.setAttribute("id", woodType);
+      option.setAttribute("value", woodType);
+      option.text = woodType;
+      woodSelect.add(option);
+   }
+
+   row3.append(woodLabel, woodSelect);
+   // Submit button
+   const submitButtn = document.createElement("button");
+   submitButtn.textContent = "Add Guitar";
+   submitButtn.setAttribute("type", "submit");
+
+   form.appendChild(row1);
+   form.appendChild(row2);
+   form.appendChild(row3);
+   form.appendChild(submitButtn);
+
+   form.querySelectorAll("div").forEach((div) => div.classList.add("form-row"));
+};
+
+populateUI();
