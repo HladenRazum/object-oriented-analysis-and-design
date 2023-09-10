@@ -15,6 +15,12 @@ const GuitarTypes = {
    ELECTRIC: "electric",
 };
 
+function capitalizeFirstLetter(string) {
+   let firstLetter = string.slice(0, 1).toUpperCase();
+   let rest = string.slice(1);
+   return firstLetter.concat(rest);
+}
+
 class GuitarSpec {
    constructor({ model, type, wood, numStrings }) {
       this.model = model;
@@ -77,6 +83,18 @@ class Inventory {
          }
       });
 
+      results.forEach((res) => {
+         const spec = res.getSpec();
+         console.log(`
+            We have a ${spec.model} ${spec.numStrings}-strings ${
+            spec.type
+         } guitar:
+               ${capitalizeFirstLetter(spec.wood)} on the front and back.
+            You can have it for only $${res.price.toFixed(2)}!   
+            ----
+         `);
+      });
+
       return results;
    }
 
@@ -134,8 +152,6 @@ const result = inventory.search({
    type: GuitarTypes.ELECTRIC,
    model: GuitarModels.TAYLOR,
 });
-
-console.log(result);
 
 // UI
 const populateUI = () => {
