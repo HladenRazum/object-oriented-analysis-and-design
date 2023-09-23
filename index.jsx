@@ -76,6 +76,7 @@ class Instrument {
     this.#specification = spec;
     this.serialNumber = serialNumber;
     this.price = price;
+    this.specType = spec.constructor.name;
   }
 
   getSpec() {
@@ -84,18 +85,6 @@ class Instrument {
 
   getSerialNumber() {
     return this.serialNumber;
-  }
-}
-
-class Guitar extends Instrument {
-  constructor({ spec, serialNumber, price }) {
-    super({ spec, serialNumber, price });
-  }
-}
-
-class Mandolin extends Instrument {
-  constructor({ spec, serialNumber, price }) {
-    super({ spec, serialNumber, price });
   }
 }
 
@@ -139,7 +128,7 @@ class Inventory {
 
 const inventory = new Inventory();
 
-const g1 = new Guitar({
+const g1 = new Instrument({
   serialNumber: "122234",
   price: 1840.0,
   spec: new GuitarSpec({
@@ -150,7 +139,7 @@ const g1 = new Guitar({
   }),
 });
 
-const g2 = new Guitar({
+const g2 = new Instrument({
   serialNumber: "1234",
   price: 840.0,
   spec: new GuitarSpec({
@@ -161,7 +150,7 @@ const g2 = new Guitar({
   }),
 });
 
-const m1 = new Mandolin({
+const m1 = new Instrument({
   spec: new MandolinSpec({
     model: "Mandoline Model 1",
     type: "mandoline type 3",
@@ -178,7 +167,7 @@ inventory.add(m1);
 
 const result = inventory.search({
   wood: WoodTypes.MAHAGONY,
-  style: MandolinStyles.B,
+  style: MandolinStyles.A,
 });
 
 console.log(result);
