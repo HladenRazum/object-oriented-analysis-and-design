@@ -15,6 +15,13 @@ const GuitarTypes = {
   ELECTRIC: "electric",
 };
 
+const MandolinStyles = {
+  A: "A",
+  B: "B",
+  C: "C",
+  F: "F",
+};
+
 function capitalizeFirstLetter(string) {
   let firstLetter = string.slice(0, 1).toUpperCase();
   let rest = string.slice(1);
@@ -22,10 +29,18 @@ function capitalizeFirstLetter(string) {
 }
 
 class StringInstrumentSpec {
-  constructor({ model, type, wood, numStrings }) {
+  constructor({ model, type, wood }) {
     this.model = model;
     this.type = type;
     this.wood = wood;
+  }
+
+  checkIfMatchesAnyProperty() {}
+}
+
+class GuitarSpec extends StringInstrumentSpec {
+  constructor({ model, type, wood, numStrings }) {
+    super({ model, type, wood });
     this.numStrings = numStrings;
   }
 
@@ -33,14 +48,26 @@ class StringInstrumentSpec {
     return (
       this.type === type ||
       this.model === model ||
-      this.wood == wood ||
+      this.wood === wood ||
       this.numStrings === numStrings
     );
   }
 }
+class MandolinSpec extends StringInstrumentSpec {
+  constructor({ model, type, wood, style }) {
+    super({ model, type, wood });
+    this.style = style;
+  }
 
-class GuitarSpec extends StringInstrumentSpec {}
-class MandolinSpec extends StringInstrumentSpec {}
+  checkIfMatchesAnyProperty({ model, type, wood, style }) {
+    return (
+      this.type === type ||
+      this.model === model ||
+      this.wood === wood ||
+      this.style === style
+    );
+  }
+}
 
 class Instrument {
   #specification;
@@ -91,10 +118,10 @@ class Inventory {
 
   search(clientPreferences) {
     const results = [];
-    this.#items.forEach((guitar) => {
-      const guitarSpec = guitar.getSpec();
-      if (guitarSpec.checkIfMatchesAnyProperty(clientPreferences)) {
-        results.push(guitar);
+    this.#items.forEach((item) => {
+      const itemSpec = item.getSpec();
+      if (itemSpec.checkIfMatchesAnyProperty(clientPreferences)) {
+        results.push(item);
       }
     });
 
@@ -129,7 +156,7 @@ const g2 = new Guitar({
   spec: new GuitarSpec({
     model: GuitarModels.TAYLOR,
     type: GuitarTypes.ACOUSTIC,
-    wood: WoodTypes.MAPLE,
+    wood: WoodTypes.MAHAGONY,
     numStrings: 12,
   }),
 });
@@ -138,8 +165,8 @@ const m1 = new Mandolin({
   spec: new MandolinSpec({
     model: "Mandoline Model 1",
     type: "mandoline type 3",
-    wood: WoodTypes.MAHAGONY,
-    numStrings: 8,
+    wood: WoodTypes.MAPLE,
+    style: MandolinStyles.A,
   }),
   serialNumber: "mandolin_1111",
   price: 475,
@@ -150,9 +177,11 @@ inventory.add(g2);
 inventory.add(m1);
 
 const result = inventory.search({
-  type: GuitarTypes.ELECTRIC,
-  model: GuitarModels.TAYLOR,
+  wood: WoodTypes.MAHAGONY,
+  style: MandolinStyles.B,
 });
+
+console.log(result);
 
 function GuitarsOnlineStore() {
   const [items, setItems] = React.useState(inventory.getAll());
@@ -177,30 +206,31 @@ function AddGuitarForm({ setItems }) {
 
     if (serialNumber && type && model) {
       const guitar = new Guitar({
-        model,
-        type,
+        spec: new GuitarSpec({
+          model,
+          type,
+          wood: WoodTypes.MAHAGONY,
+          numStrings: 999,
+        }),
         serialNumber,
-        wood: WoodTypes.MAHAGONY,
-        numStrings: 999,
         price,
       });
       setItems((prev) => [...prev, guitar]);
       inventory.add(guitar);
     }
-    console.log(e);
   };
+
+  const instrumentTypes = inventory.getAll().map((item) => item.getSpec().type);
+  const instrumentModels = inventory
+    .getAll()
+    .map((item) => item.getSpec().model);
 
   return (
     <form className="form" id="form" onSubmit={handleSubmit}>
       <Input name="serial-number" id="serial-number" label="Serial Number" />
+      <Select options={instrumentTypes} name="type" label="Type" id="type" />
       <Select
-        options={Object.values(GuitarTypes)}
-        name="type"
-        label="Type"
-        id="type"
-      />
-      <Select
-        options={Object.values(GuitarModels)}
+        options={instrumentModels}
         name="model"
         label="Model"
         id="model"
@@ -268,9 +298,9 @@ function Select({ options, label, id, name }) {
     <div className="form-row">
       <label htmlFor={id}>{label}: </label>
       <select id={id} name={name}>
-        {options.map((model) => (
-          <option value={model} key={model}>
-            {model}
+        {options.map((option) => (
+          <option value={option} key={option}>
+            {option}
           </option>
         ))}
       </select>
