@@ -28,55 +28,40 @@ function capitalizeFirstLetter(string) {
   return firstLetter.concat(rest);
 }
 
-class StringInstrumentSpec {
-  constructor({ model, type, wood }) {
-    this.model = model;
-    this.type = type;
-    this.wood = wood;
+class InstrumentSpec {
+  constructor(props) {
+    this.spec = new Map();
+    for (const [key, value] of Object.entries(props)) {
+      this.spec.set(key, value);
+    }
   }
 
-  checkIfMatchesAnyProperty() {}
-}
-
-class GuitarSpec extends StringInstrumentSpec {
-  constructor({ model, type, wood, numStrings }) {
-    super({ model, type, wood });
-    this.numStrings = numStrings;
+  get(key) {
+    return this.spec.get(key);
   }
 
-  checkIfMatchesAnyProperty({ model, type, wood, numStrings }) {
-    return (
-      this.type === type ||
-      this.model === model ||
-      this.wood === wood ||
-      this.numStrings === numStrings
-    );
-  }
-}
-class MandolinSpec extends StringInstrumentSpec {
-  constructor({ model, type, wood, style }) {
-    super({ model, type, wood });
-    this.style = style;
-  }
+  match(searchSpec) {
+    let results = [];
 
-  checkIfMatchesAnyProperty({ model, type, wood, style }) {
-    return (
-      this.type === type ||
-      this.model === model ||
-      this.wood === wood ||
-      this.style === style
-    );
+    for (const [key, value] of Object.entries(searchSpec)) {
+      const result = this.spec.get(key);
+      if (result === value || result === String(value).toUpperCase()) {
+        results.push(result);
+      }
+    }
+
+    return results.length > 0;
   }
 }
 
 class Instrument {
   #specification;
 
-  constructor({ spec, serialNumber, price }) {
+  constructor({ spec, serialNumber, price, type }) {
     this.#specification = spec;
     this.serialNumber = serialNumber;
     this.price = price;
-    this.specType = spec.constructor.name;
+    this.type = type;
   }
 
   getSpec() {
@@ -105,11 +90,12 @@ class Inventory {
     return this.#items;
   }
 
-  search(clientPreferences) {
+  search(searchSpec) {
     const results = [];
+
     this.#items.forEach((item) => {
       const itemSpec = item.getSpec();
-      if (itemSpec.checkIfMatchesAnyProperty(clientPreferences)) {
+      if (itemSpec.match(searchSpec)) {
         results.push(item);
       }
     });
@@ -128,21 +114,33 @@ class Inventory {
 
 const inventory = new Inventory();
 
+const saxophone = new Instrument({
+  type: "saxophone",
+  serialNumber: "919231023",
+  price: 2000,
+  spec: new InstrumentSpec({
+    color: "YELLOW",
+    material: "IRON",
+  }),
+});
+
 const g1 = new Instrument({
+  type: "guitar",
   serialNumber: "122234",
   price: 1840.0,
-  spec: new GuitarSpec({
+  spec: new InstrumentSpec({
     model: GuitarModels.FENDER,
     type: GuitarTypes.ELECTRIC,
-    wood: WoodTypes.WALNUT,
+    wood: WoodTypes.MAHAGONY,
     numStrings: 44,
   }),
 });
 
 const g2 = new Instrument({
+  type: "guitar",
   serialNumber: "1234",
   price: 840.0,
-  spec: new GuitarSpec({
+  spec: new InstrumentSpec({
     model: GuitarModels.TAYLOR,
     type: GuitarTypes.ACOUSTIC,
     wood: WoodTypes.MAHAGONY,
@@ -151,7 +149,8 @@ const g2 = new Instrument({
 });
 
 const m1 = new Instrument({
-  spec: new MandolinSpec({
+  type: "mandolin",
+  spec: new InstrumentSpec({
     model: "Mandoline Model 1",
     type: "mandoline type 3",
     wood: WoodTypes.MAPLE,
@@ -164,55 +163,46 @@ const m1 = new Instrument({
 inventory.add(g1);
 inventory.add(g2);
 inventory.add(m1);
+inventory.add(saxophone);
 
 const result = inventory.search({
-  wood: WoodTypes.MAHAGONY,
-  style: MandolinStyles.A,
+  style: "A",
+  material: "IRon",
 });
 
 console.log(result);
 
 function GuitarsOnlineStore() {
-  const [items, setItems] = React.useState(inventory.getAll());
-
   return (
     <>
       <h1>Guitars Online Store</h1>
-      <AddGuitarForm setItems={setItems} />
-      <InventoryList items={items} />
+      <AddGuitarForm />
     </>
   );
 }
 
-function AddGuitarForm({ setItems }) {
+function AddGuitarForm() {
   const handleSubmit = (e) => {
     e.preventDefault();
-    const data = new FormData(e.target);
-    const serialNumber = data.get("serial-number");
-    const type = data.get("type");
-    const model = data.get("model");
-    const price = data.get("price");
-
-    if (serialNumber && type && model) {
-      const guitar = new Guitar({
-        spec: new GuitarSpec({
-          model,
-          type,
-          wood: WoodTypes.MAHAGONY,
-          numStrings: 999,
-        }),
-        serialNumber,
-        price,
-      });
-      setItems((prev) => [...prev, guitar]);
-      inventory.add(guitar);
-    }
   };
 
-  const instrumentTypes = inventory.getAll().map((item) => item.getSpec().type);
-  const instrumentModels = inventory
-    .getAll()
-    .map((item) => item.getSpec().model);
+  const instrumentTypes = [
+    ...new Set(
+      inventory
+        .getAll()
+        .map((item) => item.getSpec().get("type"))
+        .filter((item) => item !== undefined)
+    ),
+  ];
+
+  const instrumentModels = [
+    ...new Set(
+      inventory
+        .getAll()
+        .map((item) => item.getSpec().get("model"))
+        .filter((item) => item !== undefined)
+    ),
+  ];
 
   return (
     <form className="form" id="form" onSubmit={handleSubmit}>
@@ -227,32 +217,6 @@ function AddGuitarForm({ setItems }) {
       <PriceInput id="price" name="price" label="Price" />
       <button className="form-button">Submit</button>
     </form>
-  );
-}
-
-function InventoryList({ items }) {
-  const updatedItems = items.map((guitar) => {
-    const spec = guitar.getSpec();
-    return {
-      model: spec.model,
-      price: guitar.price,
-      type: spec.type,
-      serialNumber: guitar.serialNumber,
-    };
-  });
-
-  return (
-    <ul>
-      {updatedItems.map((item) => (
-        <li className="inventory-list-item" key={item.serialNumber}>
-          <h4>{item.model}</h4>
-          <span>{item.type}</span>
-          <br />
-          <strong>{item.price}</strong>
-          <br />
-        </li>
-      ))}
-    </ul>
   );
 }
 
