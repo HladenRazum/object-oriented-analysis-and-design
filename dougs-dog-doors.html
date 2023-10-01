@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Doug's dog doors</title>
+      <script src="dougs-dog-doors.js" defer></script>
+      <style>
+         body {
+            font-family: Arial, Helvetica, sans-serif;
+         }
+
+         form {
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background-color: #060706;
+            padding: 1em;
+            width: 160px;
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+         }
+
+         form > button {
+            background-color: hsl(125, 60%, 47%);
+            border-radius: 5px;
+            border: 1px solid transparent;
+            font: inherit;
+            padding: 0.6em 1em;
+            margin: auto;
+            display: block;
+         }
+
+         form > button:hover {
+            background-color: hsl(125, 60%, 62%);
+         }
+
+         input[type="number"] {
+            font: inherit;
+            width: 100%;
+            height: 80%;
+            font-size: 100px;
+            background-color: transparent;
+            text-align: center;
+            border: transparent;
+            outline: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            color: #3092ff;
+            padding: 0;
+            margin: 0;
+         }
+
+         p {
+            color: blue;
+            margin: 0;
+         }
+
+         main {
+            display: flex;
+            gap: 2em;
+         }
+      </style>
+   </head>
+   <body>
+      <h1>Doug's Dog Doors</h1>
+      <main>
+         <form id="remote">
+            <button>CLICK</button>
+            <input type="number" disabled />
+            <span style="color: rgba(255, 255, 255, 0.38); font-size: 13px"
+               >remote</span
+            >
+         </form>
+         <p id="message"></p>
+      </main>
+   </body>
+</html>
